@@ -26,5 +26,9 @@ public class PlaylistService {
     public void savePlaylist(Playlist playlist) {
         playlistRepository.save(playlist);
     }
+
+    public void savePlaylists(List<Playlist> playlists) {
+        playlists.forEach(this::savePlaylist);
+    }
 }
 
