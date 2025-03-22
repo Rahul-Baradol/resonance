@@ -1,6 +1,6 @@
 package com.resonance.resonancebackend.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.resonance.resonancebackend.dto.UpdateStatus;
 import com.resonance.resonancebackend.model.Playlist;
 import com.resonance.resonancebackend.service.PlaylistService;
 import com.resonance.resonancebackend.service.SpotifyService;
@@ -28,10 +28,15 @@ public class PlaylistController {
         this.spotifyService = spotifyService;
     }
 
-    @GetMapping("/spotify/playlists")
-    public ResponseEntity<?> getAllSpotifyPlaylists() throws JsonProcessingException {
-        spotifyService.updatePlaylists();
-        return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "updated playlists from spotify successfully"));
+    @GetMapping("/spotify/update")
+    public ResponseEntity<?> getAllSpotifyPlaylists() {
+        UpdateStatus updateStatus = spotifyService.updatePlaylists();
+
+        if (updateStatus == UpdateStatus.UPDATED) {
+            return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "updated playlists from spotify successfully"));
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "couldn't update the playlists from spotify"));
     }
 
     @GetMapping("/playlists")

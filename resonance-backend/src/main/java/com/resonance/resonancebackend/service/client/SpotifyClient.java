@@ -1,5 +1,6 @@
 package com.resonance.resonancebackend.service.client;
 
+import com.resonance.resonancebackend.dto.TokenState;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,63 +43,42 @@ public class SpotifyClient {
         this.redirectUrl = redirectUrl;
     }
 
-    public boolean saveTokens(String code) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        String authHeader = Base64.getEncoder().encodeToString((this.clientId + ":" + this.clientSecret).getBytes(StandardCharsets.UTF_8));
-        headers.set("Authorization", "Basic " + authHeader);
+    private void refreshTokens() {
+        try {
+            log.debug("Refreshing tokens...");
 
-        String requestBody = UriComponentsBuilder.newInstance()
-                .queryParam("code", code)
-                .queryParam("redirect_uri", this.redirectUrl)
-                .queryParam("grant_type", "authorization_code")
-                .build().toString().substring(1);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            String authHeader = Base64.getEncoder().encodeToString((this.clientId + ":" + this.clientSecret).getBytes(StandardCharsets.UTF_8));
+            headers.set("Authorization", "Basic " + authHeader);
 
-        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+            String requestBody = UriComponentsBuilder.newInstance()
+                    .queryParam("refresh_token", this.refreshToken)
+                    .queryParam("grant_type", "refresh_token")
+                    .build().toString().substring(1);
 
-        ResponseEntity<Map<String, String>> response = restTemplate.exchange(this.tokenUrl, HttpMethod.POST, requestEntity, new ParameterizedTypeReference<>() {
-        });
+            HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
-        if (response.getStatusCode() != HttpStatus.OK) {
-            return false;
+            ResponseEntity<Map<String, String>> response = restTemplate.exchange(this.tokenUrl, HttpMethod.POST, requestEntity, new ParameterizedTypeReference<>() {
+            });
+
+            if (response.getStatusCode() != HttpStatus.OK) {
+                return;
+            }
+
+            this.accessToken = response.getBody().get("access_token");
+            this.refreshToken = response.getBody().get("refresh_token");
+        } catch (Exception exception) {
+            log.debug(exception.getMessage());
         }
-
-        this.accessToken = response.getBody().get("access_token");
-        this.refreshToken = response.getBody().get("refresh_token");
-        return true;
-    }
-
-    public void refreshTokens() {
-        log.debug("Refreshing tokens...");
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        String authHeader = Base64.getEncoder().encodeToString((this.clientId + ":" + this.clientSecret).getBytes(StandardCharsets.UTF_8));
-        headers.set("Authorization", "Basic " + authHeader);
-
-        String requestBody = UriComponentsBuilder.newInstance()
-                .queryParam("refresh_token", this.refreshToken)
-                .queryParam("grant_type", "refresh_token")
-                .build().toString().substring(1);
-
-        HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
-
-        ResponseEntity<Map<String, String>> response = restTemplate.exchange(this.tokenUrl, HttpMethod.POST, requestEntity, new ParameterizedTypeReference<>() {
-        });
-
-        if (response.getStatusCode() != HttpStatus.OK) {
-            return;
-        }
-
-        this.accessToken = response.getBody().get("access_token");
-        this.refreshToken = response.getBody().get("refresh_token");
     }
 
     private ResponseEntity<String> talk(String URL) {
         try {
             RestTemplate restTemplate = new RestTemplate();
 
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.set("Authorization", "Bearer " + this.accessToken);
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.set("Authorization", "Bearer " + this.accessToken);
 
             HttpEntity<Void> entity = new HttpEntity<>(httpHeaders);
             return restTemplate.exchange(URL, HttpMethod.GET, entity, String.class);
@@ -117,6 +97,39 @@ public class SpotifyClient {
         }
 
         return response;
+    }
+
+    public TokenState saveTokens(String code) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            String authHeader = Base64.getEncoder().encodeToString((this.clientId + ":" + this.clientSecret).getBytes(StandardCharsets.UTF_8));
+            headers.set("Authorization", "Basic " + authHeader);
+
+            String requestBody = UriComponentsBuilder.newInstance()
+                    .queryParam("code", code)
+                    .queryParam("redirect_uri", this.redirectUrl)
+                    .queryParam("grant_type", "authorization_code")
+                    .build().toString().substring(1);
+
+            HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<Map<String, String>> response = restTemplate.exchange(this.tokenUrl, HttpMethod.POST, requestEntity, new ParameterizedTypeReference<>() {
+            });
+
+            if (response.getStatusCode() != HttpStatus.OK) {
+                log.debug("Couldn't save the tokens");
+                return TokenState.NOT_SAVED;
+            }
+
+            this.accessToken = response.getBody().get("access_token");
+            this.refreshToken = response.getBody().get("refresh_token");
+
+            return TokenState.SAVED;
+        } catch (Exception exception) {
+            log.debug(exception.getMessage());
+            return TokenState.UNKNOWN_ERROR;
+        }
     }
 
 }

@@ -1,5 +1,6 @@
 package com.resonance.resonancebackend.controller;
 
+import com.resonance.resonancebackend.dto.TokenState;
 import com.resonance.resonancebackend.service.client.SpotifyClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -72,7 +73,6 @@ public class SpotifyController {
 
     @GetMapping("/callback")
     public ResponseEntity<Map> authCallback(@RequestParam(name = "code", required = false) String code, @RequestParam(name = "state", required = false) String state) {
-
         if (state == null) {
             String errorRedirectUrl = UriComponentsBuilder.fromUriString("/#")
                     .queryParam("error", "state_mismatch")
@@ -80,12 +80,16 @@ public class SpotifyController {
             return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(errorRedirectUrl)).build();
         }
 
-        boolean areTokensSaved = spotifyClient.saveTokens(code);
-        if (!areTokensSaved) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "couldn't save the tokens to the session"));
+        TokenState tokenState = spotifyClient.saveTokens(code);
+        if (tokenState == TokenState.SAVED) {
+            return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "tokens saved successfully"));
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "tokens saved successfully"));
+        if (tokenState == TokenState.NOT_SAVED) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "couldn't save the tokens"));
+        }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "unknown error while trying to save tokens"));
     }
 
 }

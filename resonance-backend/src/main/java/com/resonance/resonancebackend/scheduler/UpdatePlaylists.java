@@ -1,6 +1,6 @@
 package com.resonance.resonancebackend.scheduler;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.resonance.resonancebackend.dto.UpdateStatus;
 import com.resonance.resonancebackend.service.SpotifyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -19,8 +19,9 @@ public class UpdatePlaylists {
     }
 
     @Scheduled(fixedDelayString = "${scheduler.fixedDelayInSeconds}")
-    private void updatePlaylists() throws JsonProcessingException {
+    private void updatePlaylists() {
         log.debug("Updating playlists...");
-        spotifyService.updatePlaylists();
+        UpdateStatus updateStatus = spotifyService.updatePlaylists();
+        log.debug("Spotify Playlist Update Status: " + updateStatus.name());
     }
 }

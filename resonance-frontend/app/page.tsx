@@ -60,7 +60,7 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-50">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
-          <p className="text-lg text-gray-600">Loading your music...</p>
+          <p className="text-lg text-gray-600">Loading songs...</p>
         </div>
       </div>
     );
@@ -91,9 +91,8 @@ export default function Home() {
       <header className="max-w-6xl mx-auto mb-12">
         <h1 className="text-4xl font-bold text-gray-900 flex items-center gap-3">
           <Music className="h-8 w-8 text-indigo-600" />
-          Your Music Collection
+          Resonance!
         </h1>
-        <p className="text-gray-600 mt-2">Discover and enjoy your favorite playlists</p>
       </header>
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
