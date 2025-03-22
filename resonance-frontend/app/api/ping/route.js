@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"; 
 
 export async function GET() {
-    const SPRING_BOOT_URL = "http://resonance-backend.onrender.com/health"; 
+    const SPRING_BOOT_URL = "https://resonance-backend.onrender.com/spotify/playlists"; 
 
     try {
         const response = await fetch(SPRING_BOOT_URL);
