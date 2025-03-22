@@ -27,7 +27,6 @@ public class PlaylistController {
     @GetMapping("/playlists")
     public List<Playlist> getAllPlaylists() {
         List<Playlist> playlist = playlistService.findAllPlaylists();
-        System.out.println(playlist);
         return playlist;
     }
 
