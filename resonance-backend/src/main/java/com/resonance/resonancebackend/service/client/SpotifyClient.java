@@ -94,13 +94,18 @@ public class SpotifyClient {
     }
 
     private ResponseEntity<String> talk(String URL) {
-        RestTemplate restTemplate = new RestTemplate();
+        try {
+            RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set("Authorization", "Bearer " + this.accessToken);
 
-        HttpEntity<Void> entity = new HttpEntity<>(httpHeaders);
-        return restTemplate.exchange(URL, HttpMethod.GET, entity, String.class);
+            HttpEntity<Void> entity = new HttpEntity<>(httpHeaders);
+            return restTemplate.exchange(URL, HttpMethod.GET, entity, String.class);
+        } catch (Exception exception) {
+            log.debug(exception.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     public ResponseEntity<String> talkTo(String URL) {

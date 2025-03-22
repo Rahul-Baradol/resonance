@@ -2,6 +2,7 @@ package com.resonance.resonancebackend.controller;
 
 import com.resonance.resonancebackend.service.client.SpotifyClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -15,6 +16,7 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Controller
@@ -23,9 +25,15 @@ public class SpotifyController {
 
     private final SpotifyClient spotifyClient;
 
+    private final String applicationPassword;
+
+    private final String applicationUrl;
+
     @Autowired
-    public SpotifyController(SpotifyClient spotifyClient) {
+    public SpotifyController(SpotifyClient spotifyClient, @Value("${application.password}") String applicationPassword, @Value("${application.url}") String applicationUrl) {
         this.spotifyClient = spotifyClient;
+        this.applicationPassword = applicationPassword;
+        this.applicationUrl = applicationUrl;
     }
 
     private static String generateRandomString(int length) {
@@ -40,7 +48,15 @@ public class SpotifyController {
     }
 
     @GetMapping("/login")
-    public RedirectView login() {
+    public RedirectView login(@RequestParam(name = "password", required = false) String password) {
+        if (Objects.isNull(password)) {
+            return new RedirectView(applicationUrl + "/friendzoned");
+        }
+
+        if (!password.equals(applicationPassword)) {
+            return new RedirectView(applicationUrl + "/friendzoned");
+        }
+
         String state = generateRandomString(16);
         String scope = "user-read-private user-read-email";
 
