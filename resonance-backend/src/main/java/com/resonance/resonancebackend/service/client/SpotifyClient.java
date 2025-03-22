@@ -2,7 +2,9 @@ package com.resonance.resonancebackend.service.client;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -17,13 +19,10 @@ import java.util.Map;
 @Slf4j
 public class SpotifyClient {
 
-    @Value("${spotify.clientid}")
     private String clientId;
 
-    @Value("${spotify.clientsecret}")
     private String clientSecret;
 
-    @Value("${spotify.redirecturl}")
     private String redirectUrl;
 
     private String accessToken;
@@ -35,6 +34,13 @@ public class SpotifyClient {
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     private final RestTemplate restTemplate = new RestTemplate();
+
+    @Autowired
+    public SpotifyClient(@Value("${spotify.clientid}") String clientId, @Value("${spotify.clientsecret}") String clientSecret, @Value("${spotify.redirecturl}") String redirectUrl) {
+        this.clientId = clientId;
+        this.clientSecret = clientSecret;
+        this.redirectUrl = redirectUrl;
+    }
 
     public boolean saveTokens(String code) {
         HttpHeaders headers = new HttpHeaders();
@@ -50,14 +56,15 @@ public class SpotifyClient {
 
         HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
-        ResponseEntity<Map> response = restTemplate.exchange(this.tokenUrl, HttpMethod.POST, requestEntity, Map.class);
+        ResponseEntity<Map<String, String>> response = restTemplate.exchange(this.tokenUrl, HttpMethod.POST, requestEntity, new ParameterizedTypeReference<>() {
+        });
 
         if (response.getStatusCode() != HttpStatus.OK) {
             return false;
         }
 
-        this.accessToken = (String) response.getBody().get("access_token");
-        this.refreshToken = (String) response.getBody().get("refresh_token");
+        this.accessToken = response.getBody().get("access_token");
+        this.refreshToken = response.getBody().get("refresh_token");
         return true;
     }
 
@@ -75,14 +82,15 @@ public class SpotifyClient {
 
         HttpEntity<String> requestEntity = new HttpEntity<>(requestBody, headers);
 
-        ResponseEntity<Map> response = restTemplate.exchange(this.tokenUrl, HttpMethod.POST, requestEntity, Map.class);
+        ResponseEntity<Map<String, String>> response = restTemplate.exchange(this.tokenUrl, HttpMethod.POST, requestEntity, new ParameterizedTypeReference<>() {
+        });
 
         if (response.getStatusCode() != HttpStatus.OK) {
             return;
         }
 
-        this.accessToken = (String) response.getBody().get("access_token");
-        this.refreshToken = (String) response.getBody().get("refresh_token");
+        this.accessToken = response.getBody().get("access_token");
+        this.refreshToken = response.getBody().get("refresh_token");
     }
 
     private ResponseEntity<String> talk(String URL) {
@@ -91,7 +99,7 @@ public class SpotifyClient {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set("Authorization", "Bearer " + this.accessToken);
 
-        HttpEntity entity = new HttpEntity(httpHeaders);
+        HttpEntity<Void> entity = new HttpEntity<>(httpHeaders);
         return restTemplate.exchange(URL, HttpMethod.GET, entity, String.class);
     }
 
