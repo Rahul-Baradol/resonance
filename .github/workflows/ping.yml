@@ -1,4 +1,4 @@
-name: Ping Next.js API
+name: Ping Spring Boot From Frontend
 on:
   schedule:
     - cron: "*/10 * * * *"  # Runs every 10 minutes
