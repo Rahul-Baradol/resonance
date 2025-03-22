@@ -1,12 +1,14 @@
-name: Ping Spring Boot From Frontend
+name: Ping Spring Boot From Frontend 
+
 on:
   schedule:
-    - cron: "*/10 * * * *"  # Runs every 10 minutes
+    - cron: "* * * * *"  
 
 jobs:
   ping:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04 
     steps:
       - name: Ping Spring Boot From Frontend
-        run: curl -X GET "https://resonating.vercel.app/api/ping"
+        run: |
+          curl -fsS --retry 3 --max-time 10 "https://resonance-backend.onrender.com/health"
 
