@@ -1,8 +1,7 @@
 # Resonance
 
 This started with thought of <br>
-`What if i lose all my songs that i have saved till now?` <br>
-`For whatever reason 😆!`
+`What if i lose all my songs that i have saved till now? For whatever reason 😆!`
 
 So how about saving them, somewhere safe, so that even if spotify goes down, some night, I would be having the songs saved with their names and artists 
 <br><br>
