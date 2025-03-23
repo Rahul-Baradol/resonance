@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Music, Loader2, PlayCircle } from "lucide-react";
-import { motion } from "framer-motion";
+import { Music, Loader2, PlayCircle, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Artist {
   artists: string[];
@@ -60,7 +60,7 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-indigo-50">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
-          <p className="text-lg text-gray-600">Loading songs...</p>
+          <p className="text-lg text-gray-600">Loading your resonance...</p>
         </div>
       </div>
     );
@@ -72,7 +72,7 @@ export default function Home() {
         <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
           <div className="text-center">
             <Music className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Playlists</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Error while trying to resonate...</h2>
             <p className="text-gray-600">{error}</p>
             <button
               onClick={() => window.location.reload()}
@@ -96,52 +96,68 @@ export default function Home() {
       </header>
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {playlists.map((playlist) => (
-          <motion.div
-            key={playlist.playlist_id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
-          >
-            <div
-              className="p-6 cursor-pointer"
-              onClick={() => setExpandedPlaylist(
-                expandedPlaylist === playlist.playlist_id ? null : playlist.playlist_id
-              )}
+        {playlists.map((playlist) => {
+          const isExpanded = expandedPlaylist === playlist.playlist_id;
+          return (
+            <motion.div
+              key={playlist.playlist_id}
+              layout
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+              style={{ height: "fit-content" }}
             >
-              <div className="flex items-start justify-between">
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-900">{playlist.playlist_name}</h2>
-                  <p className="text-gray-500 mt-1">{playlist.songs.length} songs</p>
-                </div>
-                <PlayCircle className="h-6 w-6 text-indigo-600" />
-              </div>
-
-              <motion.div
-                initial={false}
-                animate={{ height: expandedPlaylist === playlist.playlist_id ? "auto" : 0 }}
-                className="overflow-hidden mt-4"
-              >
-                <div className="space-y-3">
-                  {playlist.songs.map((song, index) => (
+              <div className="p-6">
+                <button
+                  className="w-full text-left"
+                  onClick={() => setExpandedPlaylist(isExpanded ? null : playlist.playlist_id)}
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">{playlist.playlist_name}</h2>
+                      <p className="text-gray-500 mt-1">{playlist.songs.length} songs</p>
+                    </div>
                     <motion.div
-                      key={`${playlist.playlist_id}-${index}`}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="bg-gray-50 rounded-lg p-3"
+                      animate={{ rotate: isExpanded ? 180 : 0 }}
+                      transition={{ duration: 0.2 }}
                     >
-                      <h3 className="font-medium text-gray-900">{song.songName}</h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        {song.artists.join(", ")}
-                      </p>
+                      <ChevronDown className="h-6 w-6 text-indigo-600" />
                     </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-            </div>
-          </motion.div>
-        ))}
+                  </div>
+                </button>
+
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="mt-4"
+                    >
+                      <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                        {playlist.songs.map((song, index) => (
+                          <motion.div
+                            key={`${playlist.playlist_id}-${index}`}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            className="bg-gray-50 rounded-md p-2"
+                          >
+                            <h3 className="text-sm font-medium text-gray-900">{song.songName}</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              {song.artists.join(", ")}
+                            </p>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );

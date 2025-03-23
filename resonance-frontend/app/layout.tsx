@@ -10,7 +10,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: 'Resonance',
-  description: 'App which saves my songs!',
+  description: 'Saving my songs...',
 };
 
 export default function RootLayout({
