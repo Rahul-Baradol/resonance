@@ -8,7 +8,6 @@ import com.resonance.resonancebackend.dto.UpdateStatus;
 import com.resonance.resonancebackend.model.Playlist;
 import com.resonance.resonancebackend.service.client.SpotifyClient;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 

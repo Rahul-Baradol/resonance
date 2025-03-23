@@ -67,7 +67,6 @@ public class SpotifyClient {
             }
 
             this.accessToken = response.getBody().get("access_token");
-            this.refreshToken = response.getBody().get("refresh_token");
         } catch (Exception exception) {
             log.debug(exception.getMessage());
         }
