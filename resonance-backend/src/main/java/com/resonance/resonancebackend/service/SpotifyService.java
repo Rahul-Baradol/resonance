@@ -44,7 +44,7 @@ public class SpotifyService {
                 Playlist playlist = new Playlist();
 
                 String playlistId = String.valueOf(element.get("id"));
-                String playlistName = String.valueOf(element.get("name"));
+                String playlistName = String.valueOf(element.get("name")).replaceAll("\\\\\"", "\"");
 
                 playlist.setPlaylistId(playlistId.substring(1, playlistId.length() - 1));
                 playlist.setPlaylistName(playlistName.substring(1, playlistName.length() - 1));
@@ -67,13 +67,13 @@ public class SpotifyService {
 
                 for (JsonNode jsonNodeSong : songs) {
                     Song song = new Song();
-                    String songName = String.valueOf(jsonNodeSong.get("track").get("name"));
+                    String songName = String.valueOf(jsonNodeSong.get("track").get("name")).replaceAll("\\\\\"", "\"");
                     List<String> artists = new ArrayList<>();
 
                     List<JsonNode> jsonNodeArtists = objectMapper.readValue(jsonNodeSong.get("track").get("album").get("artists").toString(), new TypeReference<>() {
                     });
                     for (JsonNode artist : jsonNodeArtists) {
-                        String artistName = artist.get("name").toString();
+                        String artistName = artist.get("name").toString().replaceAll("\\\\\"", "\"");
                         artists.add(artistName.substring(1, artistName.length() - 1));
                     }
 
