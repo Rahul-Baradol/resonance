@@ -59,7 +59,7 @@ public class SpotifyController {
         }
 
         String state = generateRandomString(16);
-        String scope = "user-read-private user-read-email";
+        String scope = "user-read-private user-read-email user-library-read";
 
         String url = "https://accounts.spotify.com/authorize?" +
                 "response_type=code" +

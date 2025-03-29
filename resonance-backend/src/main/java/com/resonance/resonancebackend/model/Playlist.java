@@ -10,9 +10,9 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.List;
 
+@Data
 @Document(collection = "playlists")
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-@Data
 public class Playlist {
 
     @Id

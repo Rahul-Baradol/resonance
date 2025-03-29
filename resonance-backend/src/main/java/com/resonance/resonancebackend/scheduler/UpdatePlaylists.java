@@ -20,8 +20,13 @@ public class UpdatePlaylists {
 
     @Scheduled(fixedDelayString = "${scheduler.fixedDelayInSeconds}")
     private void updatePlaylists() {
-        log.debug("Updating playlists...");
-        UpdateStatus updateStatus = spotifyService.updatePlaylists();
-        log.debug("Spotify Playlist Update Status: " + updateStatus.name());
+        log.info("Updating playlists...");
+        UpdateStatus playlistUpdateStatus = spotifyService.updatePlaylists();
+        log.info("Spotify Playlist Update Status: " + playlistUpdateStatus.name());
+
+        log.info("Updating Top 25 Liked Songs...");
+        UpdateStatus likedSongUpdateStatus = spotifyService.updateLikedSongs(20, 0);
+        log.info("Spotify Liked Songs Update Status: " + likedSongUpdateStatus.name());
+
     }
 }

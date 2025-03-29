@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.resonance.resonancebackend.dto.Song;
 import com.resonance.resonancebackend.dto.UpdateStatus;
+import com.resonance.resonancebackend.model.LikedSong;
 import com.resonance.resonancebackend.model.Playlist;
 import com.resonance.resonancebackend.service.client.SpotifyClient;
 import lombok.extern.slf4j.Slf4j;
@@ -22,14 +23,58 @@ public class SpotifyService {
 
     private final PlaylistService playlistService;
 
+    private final LikedSongsService likedSongsService;
+
     private final ObjectMapper objectMapper;
 
     private static final String MY_PLAYLISTS = "https://api.spotify.com/v1/me/playlists";
 
-    public SpotifyService(SpotifyClient spotifyClient, PlaylistService playlistService, ObjectMapper objectMapper) {
+    private static final String LIKED_SONGS = "https://api.spotify.com/v1/me/tracks?limit=%s&offset=%s";
+
+    public SpotifyService(SpotifyClient spotifyClient, PlaylistService playlistService, LikedSongsService likedSongsService, ObjectMapper objectMapper) {
         this.spotifyClient = spotifyClient;
         this.playlistService = playlistService;
+        this.likedSongsService = likedSongsService;
         this.objectMapper = objectMapper;
+    }
+
+    public UpdateStatus updateLikedSongs(int limit, int offset) {
+        try {
+            String formatedURL = String.format(LIKED_SONGS, limit, offset);
+            ResponseEntity<String> response = spotifyClient.talkTo(formatedURL);
+
+            JsonNode jsonNodeSongs = objectMapper.readTree(response.getBody());
+
+            List<JsonNode> songs = objectMapper.readValue(jsonNodeSongs.get("items").toString(), new TypeReference<>() {
+            });
+
+            List<LikedSong> likedSongs = new ArrayList<>();
+
+            for (JsonNode jsonNodeSong : songs) {
+                Song song = new Song();
+                String songName = String.valueOf(jsonNodeSong.get("track").get("name")).replaceAll("\\\\\"", "\"");
+                List<String> artists = new ArrayList<>();
+
+                List<JsonNode> jsonNodeArtists = objectMapper.readValue(jsonNodeSong.get("track").get("album").get("artists").toString(), new TypeReference<>() {
+                });
+                for (JsonNode artist : jsonNodeArtists) {
+                    String artistName = artist.get("name").toString().replaceAll("\\\\\"", "\"");
+                    artists.add(artistName.substring(1, artistName.length() - 1));
+                }
+
+                song.setSongName(songName.substring(1, songName.length() - 1));
+                song.setArtists(artists);
+
+                LikedSong likedSong = new LikedSong(song);
+                likedSongs.add(likedSong);
+            }
+
+            likedSongsService.saveLikedSongs(likedSongs);
+            return UpdateStatus.UPDATED;
+        } catch (Exception exception) {
+            log.debug(exception.getMessage());
+            return UpdateStatus.NOT_UPDATED;
+        }
     }
 
     public UpdateStatus updatePlaylists() {

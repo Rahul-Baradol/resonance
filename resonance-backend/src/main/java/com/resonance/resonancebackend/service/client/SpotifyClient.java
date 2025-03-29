@@ -45,7 +45,7 @@ public class SpotifyClient {
 
     private void refreshTokens() {
         try {
-            log.debug("Refreshing tokens...");
+            log.info("Refreshing tokens...");
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -117,7 +117,7 @@ public class SpotifyClient {
             });
 
             if (response.getStatusCode() != HttpStatus.OK) {
-                log.debug("Couldn't save the tokens");
+                log.info("Couldn't save the tokens");
                 return TokenState.NOT_SAVED;
             }
 

@@ -19,7 +19,7 @@ public class StatusController {
 
     @GetMapping("/health")
     public ResponseEntity<Void> ping() {
-        log.debug("Ping!");
+        log.info("Ping!");
         return ResponseEntity.noContent().build();
     }
 
