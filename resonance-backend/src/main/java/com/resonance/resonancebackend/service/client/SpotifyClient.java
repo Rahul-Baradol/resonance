@@ -34,6 +34,8 @@ public class SpotifyClient {
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
+    private static final String TOKEN_EXPIRED_MESSAGE = "expired";
+
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
@@ -83,6 +85,9 @@ public class SpotifyClient {
             return restTemplate.exchange(URL, HttpMethod.GET, entity, String.class);
         } catch (Exception exception) {
             log.debug(exception.getMessage());
+            if (exception.getMessage().contains(TOKEN_EXPIRED_MESSAGE)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
@@ -90,7 +95,7 @@ public class SpotifyClient {
     public ResponseEntity<String> talkTo(String URL) {
         ResponseEntity<String> response = talk(URL);
 
-        if (response.getStatusCode() != HttpStatus.OK) {
+        if (response.getStatusCode() == HttpStatus.UNAUTHORIZED) {
             this.refreshTokens();
             response = talk(URL);
         }

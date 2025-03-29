@@ -12,6 +12,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class UpdatePlaylists {
 
+    private final int LIMIT = 25;
+
+    private final int OFFSET = 0;
+
     private final SpotifyService spotifyService;
 
     public UpdatePlaylists(SpotifyService spotifyService) {
@@ -23,10 +27,12 @@ public class UpdatePlaylists {
         log.info("Updating playlists...");
         UpdateStatus playlistUpdateStatus = spotifyService.updatePlaylists();
         log.info("Spotify Playlist Update Status: " + playlistUpdateStatus.name());
+    }
 
+    @Scheduled(fixedDelayString = "${scheduler.fixedDelayInSeconds}")
+    public void updateLikedSongs() {
         log.info("Updating Top 25 Liked Songs...");
-        UpdateStatus likedSongUpdateStatus = spotifyService.updateLikedSongs(20, 0);
+        UpdateStatus likedSongUpdateStatus = spotifyService.updateLikedSongs(LIMIT, OFFSET);
         log.info("Spotify Liked Songs Update Status: " + likedSongUpdateStatus.name());
-
     }
 }
