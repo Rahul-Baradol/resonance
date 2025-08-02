@@ -10,7 +10,7 @@ interface Song {
 }
 
 interface Playlist {
-  playlist_id: string;
+  _id: string;
   playlist_name: string;
   songs: Song[];
 }
@@ -95,10 +95,10 @@ export default function Home() {
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {playlists.map((playlist) => {
-          const isExpanded = expandedPlaylist === playlist.playlist_id;
+          const isExpanded = expandedPlaylist === playlist._id;
           return (
             <motion.div
-              key={playlist.playlist_id}
+              key={playlist._id}
               layout
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -108,7 +108,7 @@ export default function Home() {
               <div className="p-6">
                 <button
                   className="w-full text-left"
-                  onClick={() => setExpandedPlaylist(isExpanded ? null : playlist.playlist_id)}
+                  onClick={() => setExpandedPlaylist(isExpanded ? null : playlist._id)}
                 >
                   <div className="flex items-start justify-between">
                     <div>
@@ -136,7 +136,7 @@ export default function Home() {
                       <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                         {playlist.songs.map((song, index) => (
                           <motion.div
-                            key={`${playlist.playlist_id}-${index}`}
+                            key={`${playlist._id}-${index}`}
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.05 }}
